@@ -17,7 +17,9 @@ class DocxParser:
                 continue
             if "Heading" in style:
                 level = style.replace("Heading", "").strip()
-                sections.append(f"{'#' * int(level) if level.isdigit() else '#'} {text}")
+                sections.append(
+                    f"{'#' * int(level) if level.isdigit() else '#'} {text}"
+                )
             else:
                 sections.append(text)
         for table in doc.tables:
@@ -48,3 +50,8 @@ class DocxParser:
         if current_section["content"]:
             sections.append(current_section)
         return sections
+
+
+def parse_docx(file_bytes: bytes) -> str:
+    """Convenience function to parse docx and extract text."""
+    return DocxParser.extract_text(file_bytes)
