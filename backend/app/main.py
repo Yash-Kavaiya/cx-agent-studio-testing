@@ -39,6 +39,7 @@ from app.api.routes.test_cases import router as test_cases_router  # noqa: E402
 from app.api.routes.evaluations import router as evaluations_router  # noqa: E402
 from app.api.routes.sessions import router as sessions_router  # noqa: E402
 from app.api.routes.dashboard import router as dashboard_router  # noqa: E402
+from app.api.routes.export import router as export_router  # noqa: E402
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
@@ -46,6 +47,7 @@ app.include_router(test_cases_router, prefix="/api")
 app.include_router(evaluations_router, prefix="/api")
 app.include_router(sessions_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
+app.include_router(export_router, prefix="/api")
 
 
 @app.get("/api/health")

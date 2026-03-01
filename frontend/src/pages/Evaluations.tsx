@@ -1,20 +1,35 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Play, Clock, CheckCircle, XCircle, AlertCircle, BarChart3 } from 'lucide-react'
-import { api } from '../services/api'
+import { Play, CheckCircle, XCircle, Clock, BarChart3 } from 'lucide-react'
+import { evaluationsApi } from '../services/api'
+import EvaluationProgress from '../components/EvaluationProgress'
 
 export default function Evaluations() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const [activeRunId, setActiveRunId] = useState<string | null>(null)
+  const [showRunModal, setShowRunModal] = useState(false)
+  const [runConfig, setRunConfig] = useState({
+    run_count: 1,
+    generate_latency_report: true,
+    app_version: '',
+  })
 
-  const { data: runs, isLoading } = useQuery({
+  const { data: runs } = useQuery({
     queryKey: ['evaluation-runs'],
-    queryFn: () => api.get('/evaluations/runs').then(res => res.data),
+    queryFn: () => evaluationsApi.listRuns(),
   })
 
   const runMutation = useMutation({
-    mutationFn: (testSuiteId: string) =>
-      api.post('/evaluations/run', { test_suite_id: testSuiteId }),
-    onSuccess: () => {
+    mutationFn: () => evaluationsApi.run('default', {
+      ...runConfig,
+      app_version: runConfig.app_version || undefined,
+    }),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['evaluation-runs'] })
+      setActiveRunId(data.id)
+      setShowRunModal(false)
     },
   })
 
@@ -39,14 +54,19 @@ export default function Evaluations() {
           <p className="text-gray-500">Run and monitor test evaluations against CES agents</p>
         </div>
         <button
-          onClick={() => runMutation.mutate('default')}
+          onClick={() => setShowRunModal(true)}
           disabled={runMutation.isPending}
           className="btn btn-primary"
         >
           <Play className="h-4 w-4 mr-2" />
-          {runMutation.isPending ? 'Starting...' : 'Run Evaluation'}
+          Run Evaluation
         </button>
       </div>
+
+      {/* Active Run Progress */}
+      {activeRunId && (
+        <EvaluationProgress runId={activeRunId} onDismiss={() => setActiveRunId(null)} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="card">
@@ -62,7 +82,6 @@ export default function Evaluations() {
             </div>
           </div>
         </div>
-
         <div className="card">
           <div className="flex items-center">
             <div className="p-3 bg-red-50 rounded-lg">
@@ -76,7 +95,6 @@ export default function Evaluations() {
             </div>
           </div>
         </div>
-
         <div className="card">
           <div className="flex items-center">
             <div className="p-3 bg-blue-50 rounded-lg">
@@ -112,10 +130,12 @@ export default function Evaluations() {
             </thead>
             <tbody>
               {runs?.map((run: any) => (
-                <tr key={run.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">
-                    {new Date(run.created_at).toLocaleString()}
-                  </td>
+                <tr
+                  key={run.id}
+                  className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => navigate(`/evaluations/${run.id}`)}
+                >
+                  <td className="py-3 px-4">{new Date(run.created_at).toLocaleString()}</td>
                   <td className="py-3 px-4 capitalize">{run.evaluation_type || 'N/A'}</td>
                   <td className="py-3 px-4">
                     <div className="flex items-center">
@@ -127,10 +147,9 @@ export default function Evaluations() {
                   <td className="py-3 px-4 text-green-600">{run.passed_count}</td>
                   <td className="py-3 px-4 text-red-600">{run.failed_count}</td>
                   <td className="py-3 px-4">
-                    <span className={`font-medium ${
-                      (run.pass_rate || 0) >= 80 ? 'text-green-600' :
-                      (run.pass_rate || 0) >= 50 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
+                    <span className={`font-medium ${(run.pass_rate || 0) >= 80 ? 'text-green-600' :
+                        (run.pass_rate || 0) >= 50 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
                       {run.pass_rate?.toFixed(1) || 0}%
                     </span>
                   </td>
@@ -152,6 +171,58 @@ export default function Evaluations() {
           </table>
         </div>
       </div>
+
+      {/* Run Config Modal */}
+      {showRunModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Run Evaluation</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Run Count</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={runConfig.run_count}
+                  onChange={(e) => setRunConfig({ ...runConfig, run_count: parseInt(e.target.value) })}
+                  className="input"
+                />
+                <p className="text-xs text-gray-400 mt-1">Number of times to run each evaluation (1 for goldens, 5+ for scenarios)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">App Version (optional)</label>
+                <input
+                  type="text"
+                  value={runConfig.app_version}
+                  onChange={(e) => setRunConfig({ ...runConfig, app_version: e.target.value })}
+                  placeholder="Leave empty for latest"
+                  className="input"
+                />
+              </div>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={runConfig.generate_latency_report}
+                  onChange={(e) => setRunConfig({ ...runConfig, generate_latency_report: e.target.checked })}
+                  className="rounded border-gray-300 text-primary-600"
+                />
+                <span className="text-sm text-gray-700">Generate latency report (p50/p90/p99)</span>
+              </label>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button onClick={() => setShowRunModal(false)} className="btn btn-secondary">Cancel</button>
+                <button
+                  onClick={() => runMutation.mutate()}
+                  disabled={runMutation.isPending}
+                  className="btn btn-primary"
+                >
+                  {runMutation.isPending ? 'Starting…' : 'Start Run'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

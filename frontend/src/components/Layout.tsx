@@ -1,11 +1,13 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, FileText, Play, FolderKanban, Settings } from 'lucide-react'
+import { LayoutDashboard, FileText, Play, FolderKanban, Settings, MessageSquare, Calendar } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
   { name: 'Test Cases', href: '/test-cases', icon: FileText },
   { name: 'Evaluations', href: '/evaluations', icon: Play },
+  { name: 'Scheduled', href: '/evaluations/scheduled', icon: Calendar },
+  { name: 'Live Chat', href: '/live-chat', icon: MessageSquare },
 ]
 
 export default function Layout() {
@@ -23,11 +25,11 @@ export default function Layout() {
                   <NavLink
                     key={item.name}
                     to={item.href}
+                    end={item.href === '/'}
                     className={({ isActive }) =>
-                      `flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                        isActive
-                          ? 'bg-primary-50 text-primary-700'
-                          : 'text-gray-600 hover:bg-gray-100'
+                      `flex items-center px-3 py-2 rounded-md text-sm font-medium ${isActive
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-600 hover:bg-gray-100'
                       }`
                     }
                   >
@@ -38,9 +40,14 @@ export default function Layout() {
               </div>
             </div>
             <div className="flex items-center">
-              <button className="p-2 rounded-full hover:bg-gray-100">
-                <Settings className="h-5 w-5 text-gray-500" />
-              </button>
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  `p-2 rounded-full ${isActive ? 'bg-primary-50 text-primary-600' : 'hover:bg-gray-100 text-gray-500'}`
+                }
+              >
+                <Settings className="h-5 w-5" />
+              </NavLink>
             </div>
           </div>
         </div>

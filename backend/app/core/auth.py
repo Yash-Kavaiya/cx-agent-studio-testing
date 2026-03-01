@@ -6,7 +6,14 @@ from jose import JWTError, jwt
 from app.core.config import get_settings
 
 settings = get_settings()
-security = HTTPBearer()
+security = HTTPBearer(auto_error=not settings.DEBUG)
+
+# Mock user returned in dev mode when DEBUG=true
+_DEV_USER = {
+    "sub": "00000000-0000-0000-0000-000000000000",
+    "email": "dev@localhost",
+    "role": "admin",
+}
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -24,5 +31,17 @@ def verify_token(token: str) -> dict:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+async def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+) -> dict:
+    """Return current user from JWT, or a mock dev user when DEBUG=true."""
+    if settings.DEBUG:
+        if credentials and credentials.credentials:
+            try:
+                return verify_token(credentials.credentials)
+            except HTTPException:
+                pass
+        return _DEV_USER
+    if credentials is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     return verify_token(credentials.credentials)

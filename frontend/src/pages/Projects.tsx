@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, FolderKanban, ExternalLink } from 'lucide-react'
+import { Plus, FolderKanban, ChevronRight } from 'lucide-react'
 import { api } from '../services/api'
 
 export default function Projects() {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [formData, setFormData] = useState({
@@ -14,7 +16,7 @@ export default function Projects() {
     ces_app_name: '',
   })
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api.get('/projects').then(res => res.data),
   })
@@ -48,11 +50,16 @@ export default function Projects() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects?.map((project: any) => (
-          <div key={project.id} className="card hover:shadow-md transition-shadow">
+          <div
+            key={project.id}
+            className="card hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate(`/projects/${project.id}`)}
+          >
             <div className="flex items-start justify-between">
               <div className="p-2 bg-primary-50 rounded-lg">
                 <FolderKanban className="h-6 w-6 text-primary-600" />
               </div>
+              <ChevronRight className="h-5 w-5 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold mt-4">{project.name}</h3>
             <p className="text-sm text-gray-500 mt-1 line-clamp-2">

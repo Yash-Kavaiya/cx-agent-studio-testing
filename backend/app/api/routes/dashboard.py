@@ -15,6 +15,43 @@ from app.schemas.schemas import DashboardSummary
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
+@router.get("/summary", response_model=DashboardSummary)
+async def get_global_dashboard_summary(
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    """Global dashboard summary across all projects (no project filter)."""
+    total_tc = await db.scalar(select(func.count(TestCase.id))) or 0
+    approved = await db.scalar(
+        select(func.count(TestCase.id)).where(TestCase.status == ApprovalStatus.SUBMITTED)
+    ) or 0
+    pending = await db.scalar(
+        select(func.count(TestCase.id)).where(TestCase.status == ApprovalStatus.DRAFT)
+    ) or 0
+    total_runs = await db.scalar(select(func.count(EvaluationRunRecord.id))) or 0
+    total_passed = await db.scalar(
+        select(func.coalesce(func.sum(EvaluationRunRecord.passed_count), 0))
+    ) or 0
+    total_failed = await db.scalar(
+        select(func.coalesce(func.sum(EvaluationRunRecord.failed_count), 0))
+    ) or 0
+
+    last_run_result = await db.execute(
+        select(EvaluationRunRecord).where(
+            EvaluationRunRecord.state == RunState.COMPLETED
+        ).order_by(EvaluationRunRecord.created_at.desc()).limit(1)
+    )
+    last_run = last_run_result.scalar_one_or_none()
+    last_run_pass_rate = round(last_run.passed_count / last_run.total_count * 100, 1) if last_run and last_run.total_count > 0 else None
+    avg_pass_rate = round(total_passed / (total_passed + total_failed) * 100, 1) if total_passed + total_failed > 0 else None
+
+    return DashboardSummary(
+        total_test_cases=total_tc, approved_count=approved, pending_count=pending,
+        total_runs=total_runs, last_run_pass_rate=last_run_pass_rate, avg_pass_rate=avg_pass_rate,
+        total_passed=total_passed, total_failed=total_failed,
+    )
+
+
 @router.get("/{project_id}/summary", response_model=DashboardSummary)
 async def get_dashboard_summary(
     project_id: UUID,
