@@ -2,7 +2,6 @@
 
 import csv
 import io
-from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
@@ -10,15 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
 from app.core.database import get_db
-from app.models.evaluation_run import EvaluationRun as EvaluationRunRecord
-from app.models.run_result import RunResult
+from app.models.evaluation_run import EvaluationRunRecord, RunResultRecord as RunResult
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
 
 @router.get("/runs/{run_id}/csv")
 async def export_run_csv(
-    run_id: UUID,
+    run_id: str,
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user),
 ):

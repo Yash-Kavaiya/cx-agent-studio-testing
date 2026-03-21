@@ -3,8 +3,7 @@
 import enum
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, DateTime, Text, ForeignKey, Integer, Enum
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import String, DateTime, Text, ForeignKey, Integer, Enum, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
@@ -30,8 +29,8 @@ class ApprovalAction(str, enum.Enum):
 
 class TestCase(Base):
     __tablename__ = "test_cases"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    test_suite_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("test_suites.id"), nullable=False)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    test_suite_id: Mapped[str] = mapped_column(String(36), ForeignKey("test_suites.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     type: Mapped[TestCaseType] = mapped_column(Enum(TestCaseType), nullable=False)
@@ -49,10 +48,10 @@ class TestCase(Base):
 
 class TestCaseVersion(Base):
     __tablename__ = "test_case_versions"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    test_case_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("test_cases.id"), nullable=False)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    test_case_id: Mapped[str] = mapped_column(String(36), ForeignKey("test_cases.id"), nullable=False)
     version_number: Mapped[int] = mapped_column(Integer, nullable=False)
-    generated_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    generated_json: Mapped[dict] = mapped_column(JSON, nullable=False)
     gemini_prompt: Mapped[str] = mapped_column(Text, nullable=True)
     gemini_response_raw: Mapped[str] = mapped_column(Text, nullable=True)
     user_feedback: Mapped[str] = mapped_column(Text, nullable=True)
@@ -62,8 +61,8 @@ class TestCaseVersion(Base):
 
 class ApprovalRecord(Base):
     __tablename__ = "approval_records"
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    test_case_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("test_cases.id"), nullable=False)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    test_case_id: Mapped[str] = mapped_column(String(36), ForeignKey("test_cases.id"), nullable=False)
     version_number: Mapped[int] = mapped_column(Integer, nullable=False)
     action: Mapped[ApprovalAction] = mapped_column(Enum(ApprovalAction), nullable=False)
     user_email: Mapped[str] = mapped_column(String(255), nullable=False)
