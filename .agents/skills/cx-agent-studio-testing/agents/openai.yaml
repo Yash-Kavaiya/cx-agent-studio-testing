@@ -1,0 +1,6 @@
+interface:
+  display_name: "Cx Agent Studio Testing"
+  short_description: "Repo-specific patterns and workflows for cx-agent-studio-testing"
+  default_prompt: "Use the cx-agent-studio-testing repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
