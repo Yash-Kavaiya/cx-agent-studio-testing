@@ -1,16 +1,48 @@
-import { useQuery } from '@tanstack/react-query'
-import { Server, CheckCircle, XCircle, FolderKanban, Globe, MapPin, Cpu } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Server, CheckCircle, XCircle, FolderKanban, Globe, MapPin, Cpu, Key, Eye, EyeOff, Trash2 } from 'lucide-react'
 import { useActiveProject } from '../hooks/useActiveProject'
-import { healthApi } from '../services/api'
+import { healthApi, settingsApi } from '../services/api'
 
 export default function Settings() {
+    const queryClient = useQueryClient()
     const { activeProject, setActiveProject, projects, isLoading: projectsLoading } = useActiveProject()
+
+    const [showTokenInput, setShowTokenInput] = useState(false)
+    const [tokenValue, setTokenValue] = useState('')
+    const [showToken, setShowToken] = useState(false)
+    const [tokenError, setTokenError] = useState<string | null>(null)
 
     const { data: health, error: healthError } = useQuery({
         queryKey: ['health'],
         queryFn: healthApi.check,
         retry: 1,
         refetchInterval: 30000,
+    })
+
+    const { data: hfStatus } = useQuery({
+        queryKey: ['hf-token-status'],
+        queryFn: settingsApi.getHFTokenStatus,
+    })
+
+    const updateTokenMutation = useMutation({
+        mutationFn: settingsApi.updateHFToken,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['hf-token-status'] })
+            setShowTokenInput(false)
+            setTokenValue('')
+            setTokenError(null)
+        },
+        onError: (error: any) => {
+            setTokenError(error.response?.data?.detail || 'Failed to save token')
+        },
+    })
+
+    const deleteTokenMutation = useMutation({
+        mutationFn: settingsApi.deleteHFToken,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['hf-token-status'] })
+        },
     })
 
     const isHealthy = !!health && !healthError
@@ -59,6 +91,104 @@ export default function Settings() {
                 </div>
             </div>
 
+            {/* HuggingFace Integration */}
+            <div className="card">
+                <h2 className="text-lg font-semibold mb-4 flex items-center">
+                    <Key className="h-5 w-5 mr-2 text-gray-600" />
+                    HuggingFace Integration
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                    Required for Security Testing. Get your token from{' '}
+                    <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer"
+                       className="text-primary-600 hover:underline">
+                        huggingface.co/settings/tokens
+                    </a>
+                </p>
+
+                <div className={`p-4 rounded-lg border-2 ${hfStatus?.configured ? 'border-green-200 bg-green-50' : 'border-yellow-200 bg-yellow-50'}`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            {hfStatus?.configured ? (
+                                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                            ) : (
+                                <XCircle className="h-5 w-5 text-yellow-600 mr-2" />
+                            )}
+                            <span className="font-medium">
+                                {hfStatus?.configured ? 'Token Configured' : 'Token Not Configured'}
+                            </span>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowTokenInput(!showTokenInput)}
+                                className="btn btn-secondary text-sm"
+                            >
+                                {hfStatus?.configured ? 'Update' : 'Add Token'}
+                            </button>
+                            {hfStatus?.configured && (
+                                <button
+                                    onClick={() => {
+                                        if (confirm('Remove HuggingFace token?')) {
+                                            deleteTokenMutation.mutate()
+                                        }
+                                    }}
+                                    className="btn btn-secondary text-sm text-red-600"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {hfStatus?.last_updated && (
+                        <p className="text-sm text-gray-500 mt-1">
+                            Last updated: {new Date(hfStatus.last_updated).toLocaleString()}
+                        </p>
+                    )}
+                </div>
+
+                {showTokenInput && (
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <input
+                                    type={showToken ? 'text' : 'password'}
+                                    value={tokenValue}
+                                    onChange={(e) => setTokenValue(e.target.value)}
+                                    placeholder="hf_..."
+                                    className="input w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowToken(!showToken)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => updateTokenMutation.mutate(tokenValue)}
+                                disabled={!tokenValue || updateTokenMutation.isPending}
+                                className="btn btn-primary"
+                            >
+                                {updateTokenMutation.isPending ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowTokenInput(false)
+                                    setTokenValue('')
+                                    setTokenError(null)
+                                }}
+                                className="btn btn-secondary"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        {tokenError && (
+                            <p className="text-sm text-red-600 mt-2">{tokenError}</p>
+                        )}
+                    </div>
+                )}
+            </div>
+
             {/* Active Project */}
             <div className="card">
                 <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -86,10 +216,10 @@ export default function Settings() {
                             onChange={(e) => setActiveProject(e.target.value || null)}
                             className="input max-w-md"
                         >
-                            <option value="">Select a project…</option>
+                            <option value="">Select a project...</option>
                             {projects.map((p: any) => (
                                 <option key={p.id} value={p.id}>
-                                    {p.name} — {p.gcp_project_id}
+                                    {p.name} - {p.gcp_project_id}
                                 </option>
                             ))}
                         </select>

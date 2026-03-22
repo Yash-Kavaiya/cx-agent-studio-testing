@@ -81,3 +81,62 @@ export const dashboardApi = {
 export const healthApi = {
   check: () => api.get('/health').then(r => r.data),
 }
+
+// ─── Settings ──────────────────────────────────────────────
+export const settingsApi = {
+  getHFTokenStatus: () => api.get<{ configured: boolean; last_updated?: string }>('/settings/hf-token/status').then(r => r.data),
+  updateHFToken: (token: string) => api.put<{ success: boolean; updated_at: string }>('/settings/hf-token', { token }).then(r => r.data),
+  deleteHFToken: () => api.delete<{ success: boolean }>('/settings/hf-token').then(r => r.data),
+}
+
+// ─── Security Testing ──────────────────────────────────────
+export interface SecurityTestRun {
+  id: string;
+  project_id: string;
+  name: string;
+  dataset_source: string;
+  dataset_category: string;
+  state: 'pending' | 'running' | 'completed' | 'error' | 'cancelled';
+  config: Record<string, unknown>;
+  total_prompts: number;
+  completed_prompts: number;
+  attack_success_count: number;
+  attack_success_rate: number | null;
+  ces_session_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface SecurityTestResult {
+  id: string;
+  security_test_run_id: string;
+  prompt_text: string;
+  prompt_category: string | null;
+  agent_response: string | null;
+  is_attack_successful: boolean;
+  detection_method: string | null;
+  confidence_score: number | null;
+  latency_ms: number | null;
+  created_at: string;
+}
+
+export const securityTestingApi = {
+  getDatasets: () => api.get<Record<string, Array<{ id: string; name: string; size: number; description: string }>>>('/security-testing/datasets').then(r => r.data),
+  validateDataset: (datasetUrl: string) =>
+    api.post<{ valid: boolean; name?: string; size?: number; columns?: string[]; error?: string }>('/security-testing/validate-dataset', { dataset_url: datasetUrl }).then(r => r.data),
+  createRun: (data: {
+    project_id: string;
+    dataset_id: string;
+    category: string;
+    name?: string;
+    config?: { sample_size?: number; batch_size?: number; shuffle?: boolean };
+  }) => api.post<SecurityTestRun>('/security-testing/runs', data).then(r => r.data),
+  listRuns: (projectId: string, limit?: number) =>
+    api.get<{ runs: SecurityTestRun[]; total: number }>('/security-testing/runs', { params: { project_id: projectId, limit } }).then(r => r.data),
+  getRun: (runId: string) => api.get<SecurityTestRun>(`/security-testing/runs/${runId}`).then(r => r.data),
+  getResults: (runId: string, params?: { filter?: string; page?: number; per_page?: number }) =>
+    api.get<{ results: SecurityTestResult[]; total: number; page: number }>(`/security-testing/runs/${runId}/results`, { params }).then(r => r.data),
+  cancelRun: (runId: string) => api.post<{ success: boolean; state: string }>(`/security-testing/runs/${runId}/cancel`).then(r => r.data),
+  deleteRun: (runId: string) => api.delete(`/security-testing/runs/${runId}`).then(r => r.data),
+}

@@ -9,6 +9,8 @@ import ProjectDetail from './pages/ProjectDetail'
 import LiveChat from './pages/LiveChat'
 import Settings from './pages/Settings'
 import ScheduledRuns from './pages/ScheduledRuns'
+import SecurityTesting from './pages/SecurityTesting'
+import SecurityTestRunDetail from './pages/SecurityTestRunDetail'
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="evaluations/scheduled" element={<ScheduledRuns />} />
         <Route path="evaluations/:runId" element={<EvaluationRunDetail />} />
         <Route path="live-chat" element={<LiveChat />} />
+        <Route path="security-testing" element={<SecurityTesting />} />
+        <Route path="security-testing/runs/:id" element={<SecurityTestRunDetail />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

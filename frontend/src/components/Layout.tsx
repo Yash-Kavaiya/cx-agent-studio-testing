@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, FileText, Play, FolderKanban, Settings, MessageSquare, Calendar } from 'lucide-react'
+import { LayoutDashboard, FileText, Play, FolderKanban, Settings, MessageSquare, Calendar, Shield } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -8,6 +8,7 @@ const navigation = [
   { name: 'Evaluations', href: '/evaluations', icon: Play },
   { name: 'Scheduled', href: '/evaluations/scheduled', icon: Calendar },
   { name: 'Live Chat', href: '/live-chat', icon: MessageSquare },
+  { name: 'Security', href: '/security-testing', icon: Shield },
 ]
 
 export default function Layout() {
