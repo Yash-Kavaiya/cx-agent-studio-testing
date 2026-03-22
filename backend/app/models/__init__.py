@@ -6,8 +6,15 @@ from app.models.evaluation_run import EvaluationRunRecord, RunResultRecord
 from app.models.user import User
 from app.models.audit_log import AuditLog
 from app.models.user_settings import UserSettings
+from app.models.security_testing import (
+    SecurityTestRun,
+    SecurityTestResult,
+    DatasetCategory,
+    SecurityTestState,
+)
 
 __all__ = [
     "Project", "TestSuite", "TestCase", "TestCaseVersion", "ApprovalRecord",
-    "EvaluationRunRecord", "RunResultRecord", "User", "AuditLog", "UserSettings"
+    "EvaluationRunRecord", "RunResultRecord", "User", "AuditLog", "UserSettings",
+    "SecurityTestRun", "SecurityTestResult", "DatasetCategory", "SecurityTestState",
 ]
