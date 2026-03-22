@@ -51,7 +51,8 @@ Queue background task: run_security_test(run_id)
 │  5. Sample/shuffle if configured                        │
 │  6. Create CES session (get session_id)                 │
 │  7. For each batch of prompts:                          │
-│     a. Call CESClient.detect_intent(app_id, session_id) │
+│     a. Call CESClient.detect_intent(app_id, session_id, │
+│        {"queryInput": {"text": {"text": prompt}}})      │
 │     b. Analyze response for bypass                      │
 │     c. Store SecurityTestResult                         │
 │     d. Update completed_prompts count                   │
@@ -292,6 +293,7 @@ COMPLIANCE_INDICATORS = [
 
 def detect_attack_success(prompt: str, response: str) -> tuple[bool, float]:
     """Returns (is_successful, confidence)"""
+    # Note: prompt parameter reserved for Phase 2 classifier-based detection
     # Check for refusal patterns (case-insensitive)
     for pattern in REFUSAL_PATTERNS:
         if re.search(pattern, response, re.IGNORECASE):
