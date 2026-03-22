@@ -5,5 +5,9 @@ from app.models.test_case import TestCase, TestCaseVersion, ApprovalRecord
 from app.models.evaluation_run import EvaluationRunRecord, RunResultRecord
 from app.models.user import User
 from app.models.audit_log import AuditLog
+from app.models.user_settings import UserSettings
 
-__all__ = ["Project", "TestSuite", "TestCase", "TestCaseVersion", "ApprovalRecord", "EvaluationRunRecord", "RunResultRecord", "User", "AuditLog"]
+__all__ = [
+    "Project", "TestSuite", "TestCase", "TestCaseVersion", "ApprovalRecord",
+    "EvaluationRunRecord", "RunResultRecord", "User", "AuditLog", "UserSettings"
+]
