@@ -199,3 +199,100 @@ class UserResponse(BaseModel):
     is_active: bool
     class Config:
         from_attributes = True
+
+
+# ─── Security Testing Schemas ────────────────────────────────
+
+class DatasetCategory(str, Enum):
+    PROMPT_INJECTION = "prompt_injection"
+    JAILBREAKING = "jailbreaking"
+    TOXICITY = "toxicity"
+    INDIRECT_ATTACK = "indirect_attack"
+
+
+class SecurityTestState(str, Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    ERROR = "error"
+    CANCELLED = "cancelled"
+
+
+class HFTokenUpdate(BaseModel):
+    token: str = Field(..., min_length=1)
+
+
+class HFTokenStatusResponse(BaseModel):
+    configured: bool
+    last_updated: Optional[datetime] = None
+
+
+class SecurityTestConfig(BaseModel):
+    sample_size: int = Field(default=100, ge=1, le=10000)
+    batch_size: int = Field(default=10, ge=1, le=100)
+    timeout_per_prompt: int = Field(default=30, ge=1, le=120)
+    shuffle: bool = True
+
+
+class SecurityTestRunCreate(BaseModel):
+    project_id: str
+    name: Optional[str] = None
+    dataset_id: str
+    category: DatasetCategory
+    config: SecurityTestConfig = Field(default_factory=SecurityTestConfig)
+
+
+class SecurityTestRunResponse(BaseModel):
+    id: str  # String UUID to match model
+    project_id: str
+    name: str
+    dataset_source: str
+    dataset_category: DatasetCategory
+    state: SecurityTestState
+    config: Optional[Dict[str, Any]]
+    total_prompts: int
+    completed_prompts: int
+    attack_success_count: int
+    attack_success_rate: Optional[float]
+    ces_session_id: Optional[str]
+    started_at: Optional[datetime]
+    completed_at: Optional[datetime]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SecurityTestResultResponse(BaseModel):
+    id: str  # String UUID to match model
+    security_test_run_id: str
+    prompt_text: str
+    prompt_category: Optional[str]
+    agent_response: Optional[str]
+    is_attack_successful: bool
+    detection_method: Optional[str]
+    confidence_score: Optional[float]
+    latency_ms: Optional[int]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class DatasetInfo(BaseModel):
+    id: str
+    name: str
+    size: int
+    description: str
+
+
+class DatasetValidateRequest(BaseModel):
+    dataset_url: str
+
+
+class DatasetValidateResponse(BaseModel):
+    valid: bool
+    name: Optional[str] = None
+    size: Optional[int] = None
+    columns: Optional[List[str]] = None
+    error: Optional[str] = None
