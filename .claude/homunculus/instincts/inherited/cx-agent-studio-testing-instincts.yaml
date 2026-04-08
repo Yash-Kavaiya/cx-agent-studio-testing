@@ -1,0 +1,264 @@
+# Instincts generated from https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+# Generated: 2026-03-22T14:41:06.694Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: cx-agent-studio-testing-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat, docs
+
+## Evidence
+
+- 18 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat(security): add Pydantic schemas for security testing, docs: add Security Testing implementation plan
+
+---
+id: cx-agent-studio-testing-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Commit Length
+
+## Action
+
+Write moderate-length commit messages (~66 characters)
+
+## Evidence
+
+- Average commit message length: 66 chars
+- Based on 18 commits
+
+---
+id: cx-agent-studio-testing-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: cx-agent-studio-testing-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: cx-agent-studio-testing-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Export Style
+
+## Action
+
+Prefer default exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: default
+
+---
+id: cx-agent-studio-testing-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: 
+
+---
+id: cx-agent-studio-testing-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: cx-agent-studio-testing-workflow-feature-development
+trigger: "when implementing a new feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Workflow Feature Development
+
+## Action
+
+Follow the feature-development workflow:
+1. Add feature implementation
+2. Add tests for feature
+3. Update documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~27x per month
+- Files: frontend/src/*, frontend/src/components/*, frontend/src/pages/*
+
+---
+id: cx-agent-studio-testing-workflow-add-new-backend-model-with-tests
+trigger: "when doing add new backend model with tests"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Workflow Add New Backend Model With Tests
+
+## Action
+
+Follow the add-new-backend-model-with-tests workflow:
+1. Create or update model file in backend/app/models/
+2. Update backend/app/models/__init__.py to include the new model
+3. Add or update test file in backend/tests/models/ for the new model
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/app/models/*.py, backend/app/models/__init__.py, backend/tests/models/test_*.py
+
+---
+id: cx-agent-studio-testing-workflow-add-new-pydantic-schema-with-tests
+trigger: "when doing add new pydantic schema with tests"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Workflow Add New Pydantic Schema With Tests
+
+## Action
+
+Follow the add-new-pydantic-schema-with-tests workflow:
+1. Add or update schema(s) in backend/app/schemas/schemas.py
+2. Add or update test file in backend/tests/schemas/ for the new schema(s)
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/app/schemas/schemas.py, backend/tests/schemas/test_*.py
+
+---
+id: cx-agent-studio-testing-workflow-add-new-backend-service-with-tests
+trigger: "when doing add new backend service with tests"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Workflow Add New Backend Service With Tests
+
+## Action
+
+Follow the add-new-backend-service-with-tests workflow:
+1. Create or update service file in backend/app/services/ or backend/app/core/
+2. Add or update test file in backend/tests/services/ or backend/tests/core/ for the new service
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/app/services/*.py, backend/app/core/*.py, backend/tests/services/test_*.py
+
+---
+id: cx-agent-studio-testing-workflow-update-design-spec-or-docs
+trigger: "when doing update design spec or docs"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Yash-Kavaiya/cx-agent-studio-testing
+---
+
+# Cx Agent Studio Testing Workflow Update Design Spec Or Docs
+
+## Action
+
+Follow the update-design-spec-or-docs workflow:
+1. Edit or add markdown file in docs/superpowers/specs/ or docs/superpowers/plans/
+2. Commit with a message referencing the spec or plan
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: docs/superpowers/specs/*.md, docs/superpowers/plans/*.md
+
